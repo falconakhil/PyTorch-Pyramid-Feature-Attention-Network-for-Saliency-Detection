@@ -11,6 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
+import os
+
 from src.model import SODModel
 from src.dataloader import InfDataloader, SODLoader
 
@@ -22,6 +24,9 @@ def parse_arguments():
     parser.add_argument('--use_gpu', default=True, help='Whether to use GPU or not', type=bool)
     parser.add_argument('--img_size', default=256, help='Image size to be used', type=int)
     parser.add_argument('--bs', default=24, help='Batch Size for testing', type=int)
+    parser.add_argument('--save_path', default=None, help='Path to save the masks', type=str)
+    parser.add_argument('--display_images', default=False, help='Whether to display images or not', type=bool)
+    parser.add_argument('--calculate_mae', default=False, help='Whether to calculate MAE or not', type=bool)
 
     return parser.parse_args()
 
@@ -45,6 +50,12 @@ def run_inference(args):
     # Code at later point is also written assuming batch_size = 1, so do not change
     inf_dataloader = DataLoader(inf_data, batch_size=1, shuffle=True, num_workers=2)
 
+    # Create the save path if it does not exist
+    if args.save_path is not None:
+        os.makedirs(args.save_path, exist_ok=True)
+        os.make_dirs(os.path.join(args.save_path, 'raw'),exist_ok=True)
+        os.make_dirs(os.path.join(args.save_path, 'round'),exist_ok=True)
+
     print("Press 'q' to quit.")
     with torch.no_grad():
         for batch_idx, (img_np, img_tor) in enumerate(inf_dataloader, start=1):
@@ -58,10 +69,15 @@ def run_inference(args):
             pred_masks_raw = np.squeeze(pred_masks.cpu().numpy(), axis=(0, 1))
             pred_masks_round = np.squeeze(pred_masks.round().cpu().numpy(), axis=(0, 1))
 
-            print('Image :', batch_idx)
-            cv2.imshow('Input Image', img_np)
-            cv2.imshow('Generated Saliency Mask', pred_masks_raw)
-            cv2.imshow('Rounded-off Saliency Mask', pred_masks_round)
+            if args.display_images:
+                print('Image :', batch_idx)
+                cv2.imshow('Input Image', img_np)
+                cv2.imshow('Generated Saliency Mask', pred_masks_raw)
+                cv2.imshow('Rounded-off Saliency Mask', pred_masks_round)
+
+            if args.save_path is not None:
+                cv2.imwrite(os.path.join(args.save_path, 'raw', str(batch_idx) + '.png'), pred_masks_raw)
+                cv2.imwrite(os.path.join(args.save_path, 'round', str(batch_idx) + '.png'), pred_masks_round)
 
             key = cv2.waitKey(0)
             if key == ord('q'):
@@ -101,5 +117,8 @@ def calculate_mae(args):
 
 if __name__ == '__main__':
     rt_args = parse_arguments()
-    calculate_mae(rt_args)
+
+    if rt_args.calculate_mae:
+        calculate_mae(rt_args)
+        
     run_inference(rt_args)
