@@ -53,8 +53,8 @@ def run_inference(args):
     # Create the save path if it does not exist
     if args.save_path is not None:
         os.makedirs(args.save_path, exist_ok=True)
-        os.make_dirs(os.path.join(args.save_path, 'raw'),exist_ok=True)
-        os.make_dirs(os.path.join(args.save_path, 'round'),exist_ok=True)
+        os.makedirs(os.path.join(args.save_path, 'raw'),exist_ok=True)
+        os.makedirs(os.path.join(args.save_path, 'round'),exist_ok=True)
 
     print("Press 'q' to quit.")
     with torch.no_grad():
