@@ -59,6 +59,7 @@ def run_inference(args):
     print("Press 'q' to quit.")
     with torch.no_grad():
         for batch_idx, (img_np, img_tor,img_name) in enumerate(inf_dataloader):
+            img_name=img_name[0]
             print("Generating for image: ", img_name)
 
             img_tor = img_tor.to(device)
