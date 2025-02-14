@@ -214,7 +214,7 @@ class InfDataloader(Dataset):
         img_tor = torch.from_numpy(img_tor).float()
         img_tor = self.normalize(img_tor)
 
-        img_name= self.img_paths[idx].sep('/')[-1]
+        img_name= self.img_paths[idx].split('/')[-1]
 
         return img_np, img_tor, img_name
 
