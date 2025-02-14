@@ -78,8 +78,8 @@ def run_inference(args):
                 cv2.imshow('Rounded-off Saliency Mask', pred_masks_round)
 
             if args.save_path is not None:
-                cv2.imwrite(os.path.join(args.save_path, 'raw', img_name), pred_masks_raw)
-                cv2.imwrite(os.path.join(args.save_path, 'round', img_name), pred_masks_round)
+                cv2.imwrite(os.path.join(args.save_path, 'raw', img_name), pred_masks_raw*255)
+                cv2.imwrite(os.path.join(args.save_path, 'round', img_name), pred_masks_round*255)
 
             key = cv2.waitKey(0)
             if key == ord('q'):
