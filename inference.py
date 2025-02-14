@@ -48,7 +48,7 @@ def run_inference(args):
     inf_data = InfDataloader(img_folder=args.imgs_folder, target_size=args.img_size)
     # Since the images would be displayed to the user, the batch_size is set to 1
     # Code at later point is also written assuming batch_size = 1, so do not change
-    inf_dataloader = DataLoader(inf_data, batch_size=1, shuffle=True, num_workers=2)
+    inf_dataloader = DataLoader(inf_data, batch_size=1, shuffle=False, num_workers=2)
 
     # Create the save path if it does not exist
     if args.save_path is not None:
@@ -58,7 +58,9 @@ def run_inference(args):
 
     print("Press 'q' to quit.")
     with torch.no_grad():
-        for batch_idx, (img_np, img_tor) in enumerate(inf_dataloader, start=1):
+        for batch_idx, (img_np, img_tor,img_name) in enumerate(inf_dataloader):
+            print("Generating for image: ", img_name)
+
             img_tor = img_tor.to(device)
             pred_masks, _ = model(img_tor)
 
@@ -76,8 +78,8 @@ def run_inference(args):
                 cv2.imshow('Rounded-off Saliency Mask', pred_masks_round)
 
             if args.save_path is not None:
-                cv2.imwrite(os.path.join(args.save_path, 'raw', str(batch_idx) + '.png'), pred_masks_raw)
-                cv2.imwrite(os.path.join(args.save_path, 'round', str(batch_idx) + '.png'), pred_masks_round)
+                cv2.imwrite(os.path.join(args.save_path, 'raw', img_name), pred_masks_raw)
+                cv2.imwrite(os.path.join(args.save_path, 'round', img_name), pred_masks_round)
 
             key = cv2.waitKey(0)
             if key == ord('q'):
